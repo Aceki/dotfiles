@@ -5,6 +5,7 @@ Plug 'morhetz/gruvbox'
 
 " completion
 Plug 'neovim/nvim-lspconfig'
+Plug 'hrsh7th/vim-vsnip'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
@@ -18,7 +19,6 @@ Plug 'leafgarland/typescript-vim'
 Plug 'cdelledonne/vim-cmake'
 Plug 'MaxMEllon/vim-jsx-pretty'
 Plug 'bfrg/vim-cpp-modern'
-" Plug 'fedorenchik/qt-support.vim'
 
 " other
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
@@ -30,9 +30,9 @@ Plug 'itchyny/lightline.vim'
 
 call plug#end()
 
-set expandtab
+set expandtab           " Если данная опция включена, вместо табуляции создаются пробелы 
 set smarttab
-set tabstop=4 " Кол-во пробелов, которые создаёт таб.
+set tabstop=4           " Количество пробелов, которые создаёт символ табуляции 
 set softtabstop=4
 set shiftwidth=4
 set number
@@ -53,13 +53,14 @@ set encoding=utf8
 set ffs=unix,dos,mac
 set termguicolors
 set autoread
+
 colorscheme gruvbox
 " Custom highlights for gruvbox ------
-highlight LineNr ctermbg=234
-highlight clear DiagnosticHint
-highlight link DiagnosticHint DiagnosticWarn
-highlight clear Todo
-highlight link Todo Keyword
+hi LineNr ctermbg=234
+hi clear DiagnosticHint
+hi link DiagnosticHint DiagnosticWarn
+hi clear Todo
+hi link Todo Keyword
 " ------------------------------------
 
 " mappings
@@ -89,6 +90,10 @@ lua << EOF
   hop.setup()
 EOF
 
+" configure vsnip
+imap <expr> <Tab> vsnip#jumpable(1) ? '<Plug>(vsnip-jump-next)' : '<Tab>'
+smap <expr> <Tab> vsnip#jumpable(1) ? '<Plug>(vsnip-jump-next)' : '<Tab>'
+
 " configure Treesitter 
 lua << EOF
 --  local treesitter = require'nvim-treesitter.configs'
@@ -105,31 +110,27 @@ lua << EOF
   local cmp = require'cmp'
 
   cmp.setup({
-    -- snippet = {
-      -- REQUIRED - you must specify a snippet engine
-      -- expand = function(args)
-        -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-        -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-        -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
-        -- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
-      -- end,
-    -- },
+    snippet = {
+      expand = function(args)
+        vim.fn["vsnip#anonymous"](args.body)
+      end
+    },
     mapping = {
       ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
       ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
       ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
-      ['<C-y>'] = cmp.config.disable, -- If you want to remove the default `<C-y>` mapping, You can specify `cmp.config.disable` value.
+      ['<C-y>'] = cmp.config.disable,
       ['<C-e>'] = cmp.mapping({
         i = cmp.mapping.abort(),
         c = cmp.mapping.close(),
       }),
       ['<CR>'] = cmp.mapping.confirm({ select = true }),
     },
-    sources = cmp.config.sources({
-      { name = 'nvim_lsp' }
-    }, {
-      { name = 'buffer' }
-    })
+    sources = cmp.config.sources(
+      {{ name = 'nvim_lsp' }}, 
+      {{ name = 'vsnip' }},
+      {{ name = 'buffer' }}
+    )
   })
 
   -- Use buffer source for `/`.
@@ -141,11 +142,7 @@ lua << EOF
 
   -- Use cmdline & path source for ':'.
   cmp.setup.cmdline(':', {
-    sources = cmp.config.sources({
-      { name = 'path' }
-    }, {
-      { name = 'cmdline' }
-    })
+    sources = cmp.config.sources({{ name = 'path' }}, {{ name = 'cmdline' }})
   })
 
   local on_attach = function(client, bufnr)
