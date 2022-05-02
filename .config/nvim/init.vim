@@ -47,7 +47,6 @@ set exrc
 set secure
 set smartcase
 set cursorline
-" set mouse=i
 set updatetime=750
 set encoding=utf8
 set ffs=unix,dos,mac
@@ -115,9 +114,14 @@ lua << EOF
         vim.fn["vsnip#anonymous"](args.body)
       end
     },
-    mapping = {
-      ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
-      ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+    mapping = cmp.mapping.preset.insert({
+      ['<C-n>'] = function(fallback)
+        if cmp.visible() then
+          cmp.select_next_item()
+        else
+          fallback()
+        end
+      end,
       ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
       ['<C-y>'] = cmp.config.disable,
       ['<C-e>'] = cmp.mapping({
@@ -125,7 +129,7 @@ lua << EOF
         c = cmp.mapping.close(),
       }),
       ['<CR>'] = cmp.mapping.confirm({ select = true }),
-    },
+    }),
     sources = cmp.config.sources(
       {{ name = 'nvim_lsp' }}, 
       {{ name = 'vsnip' }},
@@ -135,14 +139,14 @@ lua << EOF
 
   -- Use buffer source for `/`.
   cmp.setup.cmdline('/', {
-    sources = {
-      { name = 'buffer' }
-    }
+    sources = {{ name = 'buffer' }},
+    mapping = cmp.mapping.preset.cmdline()
   })
 
   -- Use cmdline & path source for ':'.
   cmp.setup.cmdline(':', {
-    sources = cmp.config.sources({{ name = 'path' }}, {{ name = 'cmdline' }})
+    sources = cmp.config.sources({{ name = 'path' }}, {{ name = 'cmdline' }}),
+    mapping = cmp.mapping.preset.cmdline()
   })
 
   local on_attach = function(client, bufnr)
