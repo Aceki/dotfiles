@@ -52,6 +52,7 @@ set encoding=utf8
 set ffs=unix,dos,mac
 set termguicolors
 set autoread
+set noshowmode
 
 colorscheme gruvbox
 " Custom highlights for gruvbox ------
@@ -72,6 +73,7 @@ nmap <silent> <A-k> :wincmd k<CR>
 nmap <silent> <A-j> :wincmd j<CR>
 nmap <silent> <A-h> :wincmd h<CR>
 nmap <silent> <A-l> :wincmd l<CR>
+nmap <silent> <Home> :pop<CR>
 map <C-\> :tabnew<CR>
 map <Leader>w :HopWord<CR>
 
