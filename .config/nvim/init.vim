@@ -13,12 +13,10 @@ Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-cmdline'
 
 " syntax highlight
-" Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'pangloss/vim-javascript'
 Plug 'leafgarland/typescript-vim'
-Plug 'cdelledonne/vim-cmake'
 Plug 'MaxMEllon/vim-jsx-pretty'
-Plug 'bfrg/vim-cpp-modern'
 
 " other
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
@@ -37,7 +35,6 @@ set softtabstop=4
 set shiftwidth=4
 set number
 set foldcolumn=0
-syntax on
 set noerrorbells
 set novisualbell
 set hlsearch
@@ -53,6 +50,7 @@ set ffs=unix,dos,mac
 set termguicolors
 set autoread
 set noshowmode
+syntax off
 
 colorscheme gruvbox
 " Custom highlights for gruvbox ------
@@ -210,6 +208,25 @@ lua << EOF
     capabilities = capabilities,
     flags = {
       debounce_text_changes = 150
+    }
+  }
+
+  require('nvim-treesitter.configs').setup {
+    -- A list of parser names, or "all"
+    ensure_installed = { "c", "cpp", "markdown", "json", "yaml", "dockerfile" },
+
+    -- Install parsers synchronously (only applied to `ensure_installed`)
+    sync_install = false,
+
+    -- Automatically install missing parsers when entering buffer
+    auto_install = false,
+
+    -- List of parsers to ignore installing (for "all")
+    -- ignore_install = { "javascript" },
+    highlight = {
+      enable = true,
+      -- disable = { "c", "rust" },
+      additional_vim_regex_highlighting = false,
     }
   }
 EOF
