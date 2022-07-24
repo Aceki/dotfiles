@@ -57,8 +57,6 @@ colorscheme gruvbox
 hi LineNr ctermbg=234
 hi clear DiagnosticHint
 hi link DiagnosticHint DiagnosticWarn
-hi clear Todo
-hi link Todo Keyword
 " ------------------------------------
 
 " mappings
@@ -213,7 +211,16 @@ lua << EOF
 
   require('nvim-treesitter.configs').setup {
     -- A list of parser names, or "all"
-    ensure_installed = { "c", "cpp", "markdown", "json", "yaml", "dockerfile" },
+    ensure_installed = {
+      "c",
+      "comment",
+      "cpp",
+      "dockerfile",
+      "json",
+      "markdown",
+      "yaml",
+      "lua"
+    },
 
     -- Install parsers synchronously (only applied to `ensure_installed`)
     sync_install = false,
