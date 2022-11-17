@@ -33,21 +33,23 @@ vim.opt.syntax = 'off'
 
 vim.cmd([[
 call plug#begin('~/.vim/plugged')
+Plug 'BurntSushi/ripgrep'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/vim-vsnip'
+Plug 'itchyny/lightline.vim'
+Plug 'jiangmiao/auto-pairs'
 Plug 'morhetz/gruvbox'
 Plug 'neovim/nvim-lspconfig'
-Plug 'hrsh7th/vim-vsnip'
-Plug 'hrsh7th/nvim-cmp'
-Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'hrsh7th/cmp-buffer'
-Plug 'hrsh7th/cmp-path'
-Plug 'hrsh7th/cmp-cmdline'
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-Plug 'jiangmiao/auto-pairs'
-Plug 'phaazon/hop.nvim'
-Plug 'itchyny/lightline.vim'
-Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
 Plug 'nvim-lua/plenary.nvim'
-Plug 'BurntSushi/ripgrep'
+Plug 'nvim-telescope/telescope-file-browser.nvim'
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'phaazon/hop.nvim'
+Plug 'tpope/vim-fugitive'
 call plug#end()
 ]])
 
@@ -79,6 +81,7 @@ require('nvim-treesitter.configs').setup({
 
 local telescope = require('telescope')
 local actions = require('telescope.actions')
+local file_browser = telescope.extensions.file_browser
 telescope.setup({
   defaults = {
     vimgrep_arguments = {
@@ -95,8 +98,8 @@ telescope.setup({
     mappings = {
       n = {
         ['t'] = actions.select_tab,
-        ['i'] = actions.select_horizontal,
-        ['s'] = actions.select_vertical
+        ['<C-i>'] = actions.select_horizontal,
+        ['<C-s>'] = actions.select_vertical
       },
       i = {
         ['<C-t>'] = actions.select_tab,
@@ -104,8 +107,27 @@ telescope.setup({
         ['<C-s>'] = actions.select_vertical
       }
     }
+  },
+  extensions = {
+    file_browser = {
+      initial_mode = 'normal',
+      hijack_netrw = true,
+      quiet = true,
+      dir_icon = '',
+      grouped = true,
+      mappings = {
+        n = {
+          ['ma'] = file_browser.actions.create,
+          ['md'] = file_browser.actions.remove,
+          ['mm'] = file_browser.actions.rename,
+          ['mc'] = file_browser.actions.copy,
+        }
+      }
+    }
   }
 })
+
+telescope.load_extension("file_browser")
 
 vim.api.nvim_set_var('lightline', {
   colorscheme = 'gruvbox',
@@ -209,6 +231,7 @@ vim.keymap.set('n', '<A-k>', '<cmd>wincmd k<CR>')
 vim.keymap.set('n', '<A-j>', '<cmd>wincmd j<CR>')
 vim.keymap.set('n', '<A-h>', '<cmd>wincmd h<CR>')
 vim.keymap.set('n', '<A-l>', '<cmd>wincmd l<CR>')
+vim.keymap.set('n', '<C-n>', '<cmd>Telescope file_browser<CR>')
 
 vim.cmd("imap <expr> <Tab> vsnip#jumpable(1) ? '<Plug>(vsnip-jump-next)' : '<Tab>'")
 vim.cmd("smap <expr> <Tab> vsnip#jumpable(1) ? '<Plug>(vsnip-jump-next)' : '<Tab>'")
