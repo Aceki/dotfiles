@@ -34,6 +34,7 @@ vim.opt.syntax = 'off'
 vim.cmd([[
 call plug#begin('~/.vim/plugged')
 Plug 'BurntSushi/ripgrep'
+Plug 'akinsho/bufferline.nvim', { 'tag': 'v3.*' }
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/cmp-nvim-lsp'
@@ -45,11 +46,11 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'morhetz/gruvbox'
 Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope-file-browser.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
+Plug 'nvim-tree/nvim-tree.lua'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'phaazon/hop.nvim'
-Plug 'tpope/vim-fugitive'
+Plug 'vimwiki/vimwiki'
 call plug#end()
 ]])
 
@@ -57,13 +58,58 @@ vim.cmd('colorscheme gruvbox')
 vim.cmd('highlight clear DiagnosticHint')
 vim.cmd('highlight link DiagnosticHint DiagnosticWarn')
 
+require("bufferline").setup({
+  options = {
+    diagnostics = "nvim_lsp",
+    show_buffer_icons = false,
+    show_buffer_close_icons = false,
+    show_buffer_default_icon = false,
+    show_close_icon = false,
+    show_buffer_close_icons = false,
+    hover = {
+      enabled = false
+    },
+  }
+})
+
+require("nvim-tree").setup({
+    view = {
+        side = "right",
+    },
+    renderer = {
+        icons = {
+            glyphs = {
+                default = "",
+                symlink = "",
+                bookmark = "",
+                folder = {
+                    arrow_closed = "▸",
+                    arrow_open = "▾",
+                    default = "",
+                    open = "",
+                    empty = "",
+                    empty_open = "",
+                    symlink = "",
+                    symlink_open = ""
+                }
+            }
+        },
+        special_files = {}
+    },
+    git = {
+      enable = false
+    },
+    modified = {
+      enable = false
+    },
+})
+
 require("hop").setup()
 
 require('nvim-treesitter.configs').setup({
   ensure_installed = {
     'c',
     'cmake',
-    'comment',
     'cpp',
     'dockerfile',
     'json',
@@ -81,7 +127,6 @@ require('nvim-treesitter.configs').setup({
 
 local telescope = require('telescope')
 local actions = require('telescope.actions')
-local file_browser = telescope.extensions.file_browser
 telescope.setup({
   defaults = {
     vimgrep_arguments = {
@@ -107,30 +152,14 @@ telescope.setup({
         ['<C-s>'] = actions.select_vertical
       }
     }
-  },
-  extensions = {
-    file_browser = {
-      initial_mode = 'normal',
-      hijack_netrw = true,
-      quiet = true,
-      dir_icon = '',
-      grouped = true,
-      mappings = {
-        n = {
-          ['ma'] = file_browser.actions.create,
-          ['md'] = file_browser.actions.remove,
-          ['mm'] = file_browser.actions.rename,
-          ['mc'] = file_browser.actions.copy,
-        }
-      }
-    }
   }
 })
 
-telescope.load_extension("file_browser")
-
 vim.api.nvim_set_var('lightline', {
   colorscheme = 'gruvbox',
+  enable = {
+    tabline = 0
+  },
   active = {
     left = {{'mode', 'paste'}, {'readonly', 'filename', 'modified'}},
     right = {{'lineinfo'}, {'percent'}, {'fileformat', 'fileencoding', 'filetype'}}
@@ -165,7 +194,8 @@ cmp.setup({
   sources = cmp.config.sources(
     {{ name = 'nvim_lsp' }},
     {{ name = 'vsnip' }},
-    {{ name = 'buffer' }}
+    {{ name = 'buffer' }},
+    {{ name = 'nvim_lsp_signature_help' }}
   )
 })
 cmp.setup.cmdline('/', {
@@ -199,7 +229,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.format({ async = true })<CR>', opts)
 end
 lsp.tsserver.setup({
   on_attach = on_attach,
@@ -217,22 +247,25 @@ lsp.clangd.setup({
   }
 })
 
-vim.keymap.set({ 'n', 'v' }, '<Leader>w', '<cmd>HopWord<CR>')
-vim.keymap.set('n', '<Leader>a', '<cmd>HopAnywhere<CR>')
-vim.keymap.set('n', '<A-o>', '<cmd>tabprevious<CR>')
-vim.keymap.set('n', '<A-p>', '<cmd>tabnext<CR>')
-vim.keymap.set({'n', 'v', 'o'}, '<A-9>', '<cmd>tabmove -1<CR>')
-vim.keymap.set({'n', 'v', 'o'}, '<A-0>', '<cmd>tabmove +1<CR>')
+vim.keymap.set({ 'n', 'v' }, '<Leader>hw', '<cmd>HopWord<CR>')
+vim.keymap.set('n', '<Leader>ha', '<cmd>HopAnywhere<CR>')
+vim.keymap.set('n', '<A-o>', '<cmd>bprevious<CR>')
+vim.keymap.set('n', '<A-p>', '<cmd>bnext<CR>')
+vim.keymap.set({'n', 'v', 'o'}, '<A-9>', '<cmd>tabprevious<CR>')
+vim.keymap.set({'n', 'v', 'o'}, '<A-0>', '<cmd>tabnext<CR>')
 vim.keymap.set('n', 'ff', '<cmd>Telescope find_files<CR>')
 vim.keymap.set('n', 'fg', '<cmd>Telescope live_grep<CR>')
 vim.keymap.set('n', 'fr', '<cmd>Telescope lsp_references<CR>')
+vim.keymap.set('n', 'fb', '<cmd>Telescope buffers<CR>')
 vim.keymap.set('n', '<Home>', '<cmd>pop<CR>')
 vim.keymap.set('n', '<A-k>', '<cmd>wincmd k<CR>')
 vim.keymap.set('n', '<A-j>', '<cmd>wincmd j<CR>')
 vim.keymap.set('n', '<A-h>', '<cmd>wincmd h<CR>')
 vim.keymap.set('n', '<A-l>', '<cmd>wincmd l<CR>')
-vim.keymap.set('n', '<C-n>', '<cmd>Telescope file_browser<CR>')
+vim.keymap.set('n', '<C-n>', '<cmd>NvimTreeToggle<CR>')
 
 vim.cmd("imap <expr> <Tab> vsnip#jumpable(1) ? '<Plug>(vsnip-jump-next)' : '<Tab>'")
 vim.cmd("smap <expr> <Tab> vsnip#jumpable(1) ? '<Plug>(vsnip-jump-next)' : '<Tab>'")
+
+vim.cmd("let g:vimwiki_list = [{'path': '~/vimwiki/', 'syntax': 'markdown', 'ext': '.md'}]")
 
