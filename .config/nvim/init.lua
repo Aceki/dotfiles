@@ -48,6 +48,7 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
 Plug 'nvim-tree/nvim-tree.lua'
+Plug 'nvim-tree/nvim-web-devicons'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'phaazon/hop.nvim'
 Plug 'vimwiki/vimwiki'
@@ -73,35 +74,18 @@ require("bufferline").setup({
 })
 
 require("nvim-tree").setup({
-    view = {
-        side = "right",
-    },
-    renderer = {
-        icons = {
-            glyphs = {
-                default = "",
-                symlink = "",
-                bookmark = "",
-                folder = {
-                    arrow_closed = "▸",
-                    arrow_open = "▾",
-                    default = "",
-                    open = "",
-                    empty = "",
-                    empty_open = "",
-                    symlink = "",
-                    symlink_open = ""
-                }
-            }
-        },
-        special_files = {}
-    },
-    git = {
-      enable = false
-    },
-    modified = {
-      enable = false
-    },
+  view = {
+    side = "right",
+  },
+  renderer = {
+    special_files = {}
+  },
+  git = {
+    enable = false
+  },
+  modified = {
+    enable = false
+  },
 })
 
 require("hop").setup()
@@ -247,12 +231,13 @@ lsp.clangd.setup({
   }
 })
 
-vim.keymap.set({ 'n', 'v' }, '<Leader>hw', '<cmd>HopWord<CR>')
+vim.keymap.set({'n', 'v'}, '<Leader>hw', '<cmd>HopWord<CR>')
 vim.keymap.set('n', '<Leader>ha', '<cmd>HopAnywhere<CR>')
-vim.keymap.set('n', '<A-o>', '<cmd>bprevious<CR>')
-vim.keymap.set('n', '<A-p>', '<cmd>bnext<CR>')
-vim.keymap.set({'n', 'v', 'o'}, '<A-9>', '<cmd>tabprevious<CR>')
-vim.keymap.set({'n', 'v', 'o'}, '<A-0>', '<cmd>tabnext<CR>')
+vim.keymap.set('n', '<A-o>', '<cmd>BufferLineCyclePrev<CR>')
+vim.keymap.set('n', '<A-p>', '<cmd>BufferLineCycleNext<CR>')
+vim.keymap.set('n', '<A-9>', '<cmd>BufferLineMovePrev<CR>')
+vim.keymap.set('n', '<A-0>', '<cmd>BufferLineMoveNext<CR>')
+vim.keymap.set('n', '<A-u>', '<cmd>tabnext<CR>')
 vim.keymap.set('n', 'ff', '<cmd>Telescope find_files<CR>')
 vim.keymap.set('n', 'fg', '<cmd>Telescope live_grep<CR>')
 vim.keymap.set('n', 'fr', '<cmd>Telescope lsp_references<CR>')
