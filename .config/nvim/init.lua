@@ -76,6 +76,9 @@ require("bufferline").setup({
 require("nvim-tree").setup({
   view = {
     side = "right",
+    width = {
+        padding = 2
+    }
   },
   renderer = {
     special_files = {}
@@ -248,6 +251,7 @@ vim.keymap.set('n', '<A-j>', '<cmd>wincmd j<CR>')
 vim.keymap.set('n', '<A-h>', '<cmd>wincmd h<CR>')
 vim.keymap.set('n', '<A-l>', '<cmd>wincmd l<CR>')
 vim.keymap.set('n', '<C-n>', '<cmd>NvimTreeToggle<CR>')
+vim.keymap.set('n', '<C-w>c', '<cmd>tabnew<CR>')
 
 vim.cmd("imap <expr> <Tab> vsnip#jumpable(1) ? '<Plug>(vsnip-jump-next)' : '<Tab>'")
 vim.cmd("smap <expr> <Tab> vsnip#jumpable(1) ? '<Plug>(vsnip-jump-next)' : '<Tab>'")
