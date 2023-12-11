@@ -34,24 +34,24 @@ vim.opt.syntax = 'off'
 vim.cmd([[
 call plug#begin('~/.vim/plugged')
 Plug 'BurntSushi/ripgrep'
-Plug 'akinsho/bufferline.nvim', { 'tag': 'v3.*' }
-Plug 'hrsh7th/cmp-buffer'
-Plug 'hrsh7th/cmp-cmdline'
-Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'hrsh7th/cmp-path'
-Plug 'hrsh7th/nvim-cmp'
-Plug 'hrsh7th/vim-vsnip'
-Plug 'itchyny/lightline.vim'
-Plug 'jiangmiao/auto-pairs'
-Plug 'morhetz/gruvbox'
-Plug 'neovim/nvim-lspconfig'
-Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
-Plug 'nvim-tree/nvim-tree.lua'
-Plug 'nvim-tree/nvim-web-devicons'
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-Plug 'phaazon/hop.nvim'
-Plug 'vimwiki/vimwiki'
+Plug 'akinsho/bufferline.nvim',         { 'tag': 'v3.*' }
+Plug 'hrsh7th/cmp-buffer',              { 'commit': '3022dbc' }
+Plug 'hrsh7th/cmp-cmdline',             { 'commit': '8ee981b' }
+Plug 'hrsh7th/cmp-nvim-lsp',            { 'commit': '44b16d1' }
+Plug 'hrsh7th/cmp-path',                { 'commit': '91ff86c' }
+Plug 'hrsh7th/nvim-cmp',                { 'commit': '5dce1b7' }
+Plug 'hrsh7th/vim-vsnip',               { 'commit': 'be27746' }
+Plug 'itchyny/lightline.vim',           { 'commit': 'f11645c' }
+Plug 'jiangmiao/auto-pairs',            { 'commit': '39f06b8' }
+Plug 'morhetz/gruvbox',                 { 'commit': 'f1ecde8' }
+Plug 'neovim/nvim-lspconfig',           { 'tag': 'v0.1.7' }
+Plug 'nvim-lua/plenary.nvim',           { 'commit': '5001291' }
+Plug 'nvim-telescope/telescope.nvim',   { 'tag': '0.1.5' }
+Plug 'nvim-tree/nvim-tree.lua',         { 'commit': 'aaee4cd' }
+Plug 'nvim-tree/nvim-web-devicons',     { 'commit': '3af7451' }
+Plug 'nvim-treesitter/nvim-treesitter', { 'commit': '30604fd' }
+Plug 'phaazon/hop.nvim',                { 'commit': '1a1ecea' }
+Plug 'vimwiki/vimwiki',                 { 'commit': 'f0fe154' }
 call plug#end()
 ]])
 
@@ -84,11 +84,20 @@ require("nvim-tree").setup({
     special_files = {}
   },
   git = {
-    enable = false
+    enable = true
   },
   modified = {
     enable = false
   },
+  filters = {
+      dotfiles = true,
+      exclude = {
+          ".gitignore",
+          ".dockerignore",
+          ".prettier*",
+          ".env*"
+      }
+  }
 })
 
 require("hop").setup()
@@ -102,7 +111,10 @@ require('nvim-treesitter.configs').setup({
     'json',
     'lua',
     'markdown',
-    'yaml'
+    'yaml',
+    'javascript',
+    'typescript',
+    'tsx'
   },
   sync_install = false,
   auto_install = false,
@@ -113,9 +125,9 @@ require('nvim-treesitter.configs').setup({
 })
 
 local telescope = require('telescope')
-local actions = require('telescope.actions')
 telescope.setup({
   defaults = {
+    layout_strategy = 'vertical',
     vimgrep_arguments = {
       'rg',
       '--color=never',
@@ -126,19 +138,7 @@ telescope.setup({
       '--smart-case',
       '--trim'
     },
-    initial_mode = 'insert',
-    mappings = {
-      n = {
-        ['t'] = actions.select_tab,
-        ['<C-i>'] = actions.select_horizontal,
-        ['<C-s>'] = actions.select_vertical
-      },
-      i = {
-        ['<C-t>'] = actions.select_tab,
-        ['<C-i>'] = actions.select_horizontal,
-        ['<C-s>'] = actions.select_vertical
-      }
-    }
+    initial_mode = 'insert'
   }
 })
 
@@ -218,6 +218,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.format({ async = true })<CR>', opts)
 end
+
 lsp.tsserver.setup({
   on_attach = on_attach,
   capabilities = capabilities,
@@ -258,3 +259,4 @@ vim.cmd("smap <expr> <Tab> vsnip#jumpable(1) ? '<Plug>(vsnip-jump-next)' : '<Tab
 
 vim.cmd("let g:vimwiki_list = [{'path': '~/vimwiki/', 'syntax': 'markdown', 'ext': '.md'}]")
 
+vim.diagnostic.config({ severity_sort = true })
