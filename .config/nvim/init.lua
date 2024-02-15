@@ -1,35 +1,36 @@
-vim.opt.expandtab = true
-vim.opt.smarttab = true
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
-vim.opt.shiftwidth = 4
-vim.opt.number = true
-vim.opt.relativenumber = true
-vim.opt.foldcolumn = '0'
-vim.opt.errorbells = false
-vim.opt.visualbell = false
-vim.opt.hlsearch = true
-vim.opt.incsearch = true
-vim.opt.ignorecase = true
-vim.opt.exrc = true
-vim.opt.secure = true
-vim.opt.smartcase = true
-vim.opt.cursorline = true
-vim.opt.updatetime = 750
-vim.opt.encoding = 'utf8'
-vim.opt.ffs = {'unix', 'dos', 'mac'}
-vim.opt.showmode = false
-vim.opt.termguicolors = true
 vim.opt.autoread = true
-vim.opt.foldenable = false
-vim.opt.foldmethod = 'marker'
-vim.opt.foldmarker = {'{', '}'}
-vim.opt.foldlevel = 100
 vim.opt.clipboard = 'unnamedplus'
 vim.opt.cmdheight = 0
+vim.opt.colorcolumn = '100'
+vim.opt.cursorline = true
+vim.opt.encoding = 'utf8'
+vim.opt.errorbells = false
+vim.opt.expandtab = true
+vim.opt.exrc = true
+vim.opt.ffs = {'unix', 'dos', 'mac'}
+vim.opt.foldcolumn = '0'
+vim.opt.foldenable = false
+vim.opt.foldlevel = 100
+vim.opt.foldmarker = {'{', '}'}
+vim.opt.foldmethod = 'marker'
+vim.opt.hlsearch = true
+vim.opt.ignorecase = true
+vim.opt.incsearch = true
 vim.opt.list =  true
 vim.opt.listchars = {trail = '@'}
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.secure = true
+vim.opt.shiftwidth = 4
+vim.opt.showmode = false
+vim.opt.smartcase = true
+vim.opt.smarttab = true
+vim.opt.softtabstop = 4
 vim.opt.syntax = 'off'
+vim.opt.tabstop = 4
+vim.opt.termguicolors = true
+vim.opt.updatetime = 750
+vim.opt.visualbell = false
 
 vim.cmd([[
 call plug#begin('~/.vim/plugged')
@@ -73,9 +74,9 @@ require("bufferline").setup({
   }
 })
 
-require("nvim-tree").setup({
+require('nvim-tree').setup({
   view = {
-    side = "right",
+    side = 'right',
     width = {
         padding = 2
     }
@@ -92,10 +93,11 @@ require("nvim-tree").setup({
   filters = {
       dotfiles = true,
       exclude = {
-          ".gitignore",
-          ".dockerignore",
-          ".prettier*",
-          ".env*"
+          '.gitignore',
+          '.dockerignore',
+          '.prettier*',
+          '.sequelizerc',
+          '.env*',
       }
   }
 })
@@ -194,47 +196,41 @@ cmp.setup.cmdline(':', {
   mapping = cmp.mapping.preset.cmdline()
 })
 
-local lsp = require('lspconfig')
-local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
-local on_attach = function(client, bufnr)
-  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+local lspconfig = require('lspconfig')
 
-  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+lspconfig.tsserver.setup({})
+lspconfig.clangd.setup({})
+lspconfig.sqlls.setup({})
 
-  local opts = { noremap = true, silent = true }
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+  callback = function(ev)
+    -- Enable completion triggered by <c-x><c-o>
+    vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
 
-  buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-  buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-  buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-  buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-  buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.format({ async = true })<CR>', opts)
-end
-
-lsp.tsserver.setup({
-  on_attach = on_attach,
-  capabilities = capabilities,
-  flags = {
-    debounce_text_changes = 150
-  }
-})
-lsp.clangd.setup({
-  on_attach = on_attach,
-  capabilities = capabilities,
-  cmd = { 'clangd', '--enable-config', '--background-index' },
-  flags = {
-    debounce_text_changes = 150
-  }
+    local opts = { buffer = ev.buf }
+    vim.keymap.set('n', 'gd', vim.lsp.buf.declaration, opts)
+    vim.keymap.set('n', 'gD', vim.lsp.buf.definition, opts)
+    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+    vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
+    vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
+    vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, opts)
+    vim.keymap.set('n', '<space>wl', function()
+      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    end, opts)
+    vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, opts)
+    vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+    vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+    vim.keymap.set('n', '<space>f', function()
+      vim.lsp.buf.format { async = true }
+    end, opts)
+  end
 })
 
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float)
+vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist)
 vim.keymap.set({'n', 'v'}, '<Leader>hw', '<cmd>HopWord<CR>')
 vim.keymap.set('n', '<Leader>ha', '<cmd>HopAnywhere<CR>')
 vim.keymap.set('n', '<A-o>', '<cmd>BufferLineCyclePrev<CR>')
@@ -246,7 +242,6 @@ vim.keymap.set('n', 'ff', '<cmd>Telescope find_files<CR>')
 vim.keymap.set('n', 'fg', '<cmd>Telescope live_grep<CR>')
 vim.keymap.set('n', 'fr', '<cmd>Telescope lsp_references<CR>')
 vim.keymap.set('n', 'fb', '<cmd>Telescope buffers<CR>')
-vim.keymap.set('n', '<Home>', '<cmd>pop<CR>')
 vim.keymap.set('n', '<A-k>', '<cmd>wincmd k<CR>')
 vim.keymap.set('n', '<A-j>', '<cmd>wincmd j<CR>')
 vim.keymap.set('n', '<A-h>', '<cmd>wincmd h<CR>')
@@ -260,3 +255,4 @@ vim.cmd("smap <expr> <Tab> vsnip#jumpable(1) ? '<Plug>(vsnip-jump-next)' : '<Tab
 vim.cmd("let g:vimwiki_list = [{'path': '~/vimwiki/', 'syntax': 'markdown', 'ext': '.md'}]")
 
 vim.diagnostic.config({ severity_sort = true })
+
